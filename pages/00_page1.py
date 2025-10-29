@@ -1,5 +1,4 @@
 import koreanize_matplotlib
-
 import streamlit as st
 import pandas as pd
 import plotly.express as px
@@ -7,9 +6,11 @@ import plotly.express as px
 # 데이터 로드
 df = pd.read_csv("countriesMBTI_16types.csv")
 
-# 퍼센트 변환 (소수점 둘째 자리까지)
+# 퍼센트 변환 (소수점 둘째 자리까지) - 컬럼을 숫자로 변환 후 처리
 for col in df.columns[1:]:
-    df[col] = (df[col] * 100).round(2)
+    # 숫자로 변환 (비숫자 값은 NaN으로 처리)
+    df[col] = pd.to_numeric(df[col], errors='coerce')  # errors='coerce' will set invalid parsing as NaN
+    df[col] = (df[col] * 100).round(2)  # 비율 계산 후 반올림
 
 # 앱 제목 (이모지 활용)
 st.header("🧑🏻‍💻서울고 석리송 선생님과 함께하는! 👩🏻‍💻")
@@ -19,6 +20,7 @@ st.markdown(
     "📊 **데이터 출처**: [Kaggle - MBTI Types by Country](https://www.kaggle.com/datasets/yamaerenay/mbtitypes-full/data)",
     help="MBTI 유형의 국가별 분포 데이터를 Kaggle에서 가져왔습니다."
 )
+
 # 국가 선택
 global_mbti_types = sorted(set(df.columns) - {"Country"})
 country = st.selectbox("🌏 국가를 선택하세요:", df["Country"].unique())
